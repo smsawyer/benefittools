@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<!-- saved from url=(0076)file:///C:/Users/ssawyer/Downloads/employee_effective_date_calculator_1.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Employee Effective Date Calculator</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; background: #f5f5f3; color: #1a1a1a; min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 2rem 1rem; }
+  .card { background: #fff; border-radius: 12px; border: 1px solid #e0ddd5; padding: 2rem; max-width: 640px; width: 100%; }
+  h1 { font-size: 18px; font-weight: 500; text-align: center; margin-bottom: 1.5rem; color: #1a1a1a; }
+  .input-row { display: flex; align-items: center; gap: 12px; background: #f5f5f3; border: 1px solid #e0ddd5; border-radius: 8px; padding: 12px 16px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .input-row label { font-size: 14px; font-weight: 500; color: #1a1a1a; white-space: nowrap; }
+  .input-row input[type="date"] { flex: 1; min-width: 140px; border: 1px solid #c8c5bc; border-radius: 6px; padding: 6px 10px; font-size: 14px; background: #fff; color: #1a1a1a; }
+  .results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.5rem; }
+  .section-card { background: #fff; border: 1px solid #e0ddd5; border-radius: 10px; overflow: hidden; }
+  .section-header { padding: 8px 14px; font-size: 13px; font-weight: 500; }
+  .fom-header { background: #B5D4F4; color: #0C447C; }
+  .actual-header { background: #C0DD97; color: #27500A; }
+  .custom-header { background: #FAC775; color: #633806; font-size: 12px; }
+  .result-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 14px; border-top: 1px solid #e0ddd5; }
+  .result-label { font-size: 13px; color: #666; }
+  .result-value { font-size: 13px; font-weight: 500; color: #1a1a1a; }
+  .result-value.empty { color: #bbb; font-weight: 400; }
+  .custom-section { background: #fff; border: 1px solid #e0ddd5; border-radius: 10px; overflow: hidden; margin-bottom: 1.5rem; }
+  .custom-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 14px; border-top: 1px solid #e0ddd5; flex-wrap: wrap; gap: 8px; }
+  .custom-row label { font-size: 13px; color: #666; }
+  .custom-input { border: 1px solid #c8c5bc; border-radius: 6px; padding: 5px 8px; font-size: 13px; background: #fff; color: #1a1a1a; width: 64px; }
+  .custom-result { font-size: 13px; font-weight: 500; color: #1a1a1a; min-width: 110px; text-align: right; }
+  .reset-btn { display: block; margin: 0 auto 1.5rem; padding: 7px 28px; font-size: 13px; cursor: pointer; border: 1px solid #c8c5bc; border-radius: 6px; background: #fff; color: #1a1a1a; transition: background 0.15s; }
+  .reset-btn:hover { background: #f5f5f3; }
+  .disclaimer { font-size: 12px; color: #666; background: #f5f5f3; border: 1px solid #e0ddd5; border-radius: 8px; padding: 12px 14px; line-height: 1.6; }
+  .disclaimer p { margin: 0 0 8px; }
+  .disclaimer p:last-child { margin-bottom: 0; }
+  .disclaimer strong { font-weight: 500; color: #1a1a1a; }
+  .disclaimer ol { margin: 4px 0 0 1.2em; padding: 0; }
+  .disclaimer ol li { margin-bottom: 2px; }
+  @media (max-width: 480px) { .results-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Employee Effective Date Calculator</h1>
+
+  <div class="input-row">
+    <label for="eventDate">📅 Event date / date of hire</label>
+    <input type="date" id="eventDate" oninput="calculate()">
+  </div>
+
+  <div class="results-grid">
+    <div class="section-card">
+      <div class="section-header fom-header">First of month following</div>
+      <div class="result-row">
+        <span class="result-label">Date of hire</span>
+        <span class="result-value empty" id="fom-doh">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">30 days</span>
+        <span class="result-value empty" id="fom-30">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">60 days</span>
+        <span class="result-value empty" id="fom-60">—</span>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-header actual-header">Actual effective date</div>
+      <div class="result-row">
+        <span class="result-label">Date of hire</span>
+        <span class="result-value empty" id="act-doh">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">30th day</span>
+        <span class="result-value empty" id="act-30">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">60th day</span>
+        <span class="result-value empty" id="act-60">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">90th day</span>
+        <span class="result-value empty" id="act-90">—</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="custom-section">
+    <div class="section-header custom-header">*** Custom probationary period &nbsp;(groups 101+ only, must be selected at setup or renewal)</div>
+    <div class="custom-row">
+      <label>Days — actual date met</label>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <input type="number" class="custom-input" id="customDays1" min="1" max="365" placeholder="—" oninput="calculate()">
+        <span class="custom-result" id="custom-actual">—</span>
+      </div>
+    </div>
+    <div class="custom-row">
+      <label>Days — first of month following</label>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <input type="number" class="custom-input" id="customDays2" min="1" max="365" placeholder="—" oninput="calculate()">
+        <span class="custom-result" id="custom-fom">—</span>
+      </div>
+    </div>
+  </div>
+
+  <button class="reset-btn" onclick="resetCalc()">↺ Reset</button>
+
+  <div class="disclaimer">
+    <p>This tool is provided as a courtesy. <strong>Contract rules supersede this tool.</strong> Refer to your current Group Master Application or contract to determine the employee's probationary period.</p>
+    <p><strong>* Event date / date of hire:</strong> The date the employee has satisfied all eligibility criteria and is eligible to begin serving the probationary period. Refer to your contract and/or Group Administrator Guide for eligibility guidelines.</p>
+    <p><strong>** Date of hire:</strong> For members serving a First of the Month Following Date of Hire probationary period, refer to your Group Master Application for the appropriate selection. Employees hired on the first of the month:
+      </p><ol type="a">
+        <li>Effective date = date of hire, or</li>
+        <li>Effective date = the first of the month following their date of hire.</li>
+      </ol>
+    <p></p>
+    <p><strong>*** Custom probationary periods:</strong> Available only to groups rated 101+ and must be selected and approved at setup or renewal.</p>
+  </div>
+</div>
+
+<script>
+function fmt(d) {
+  if (!d) return '—';
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+function firstOfMonthFollowing(d) {
+  return new Date(d.getFullYear(), d.getMonth() + 1, 1);
+}
+function nthDay(doh, n) {
+  var r = new Date(doh);
+  r.setDate(r.getDate() + (n - 1));
+  return r;
+}
+function fomAfterNDays(doh, n) {
+  return firstOfMonthFollowing(nthDay(doh, n));
+}
+function setVal(id, d) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  if (!d) { el.textContent = '—'; el.className = 'result-value empty'; return; }
+  el.textContent = fmt(d);
+  el.className = 'result-value';
+}
+function setCustomVal(id, d) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = d ? fmt(d) : '—';
+}
+function calculate() {
+  var input = document.getElementById('eventDate').value;
+  if (!input) {
+    ['fom-doh','fom-30','fom-60','act-doh','act-30','act-60','act-90'].forEach(function(id){ setVal(id, null); });
+    setCustomVal('custom-actual', null);
+    setCustomVal('custom-fom', null);
+    return;
+  }
+  var parts = input.split('-');
+  var doh = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+  setVal('fom-doh', firstOfMonthFollowing(doh));
+  setVal('fom-30', fomAfterNDays(doh, 30));
+  setVal('fom-60', fomAfterNDays(doh, 60));
+  setVal('act-doh', doh);
+  setVal('act-30', nthDay(doh, 30));
+  setVal('act-60', nthDay(doh, 60));
+  setVal('act-90', nthDay(doh, 90));
+  var d1 = parseInt(document.getElementById('customDays1').value);
+  var d2 = parseInt(document.getElementById('customDays2').value);
+  setCustomVal('custom-actual', (!isNaN(d1) && d1 > 0) ? nthDay(doh, d1) : null);
+  setCustomVal('custom-fom', (!isNaN(d2) && d2 > 0) ? fomAfterNDays(doh, d2) : null);
+}
+function resetCalc() {
+  document.getElementById('eventDate').value = '';
+  document.getElementById('customDays1').value = '';
+  document.getElementById('customDays2').value = '';
+  calculate();
+}
+</script>
+
+
+</body></html>
