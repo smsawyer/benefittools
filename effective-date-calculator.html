@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Effective Date & Lookback Calculator</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 24px 16px;
+    background: #f5f5f3;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #222;
+    font-size: 15px;
+    line-height: 1.4;
+  }
+  .wrap { max-width: 600px; margin: 0 auto; }
+  h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 12px;
+  }
+  .section { margin-bottom: 32px; }
+  .card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .card-body { padding: 16px; }
+  label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  input[type="date"] {
+    font-family: inherit;
+    font-size: 15px;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    width: 100%;
+    max-width: 240px;
+    background: #fff;
+    color: #222;
+  }
+  input[type="date"]:focus { outline: 2px solid #8ab4e8; outline-offset: 1px; }
+  .card-header {
+    padding: 10px 16px;
+    font-weight: 600;
+    font-size: 15px;
+  }
+  .header-blue { background: #B5D4F4; color: #0C447C; }
+  .header-green { background: #C0DD97; color: #27500A; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 9px 16px; font-size: 14px; }
+  th {
+    font-weight: 600;
+    color: #555;
+    border-bottom: 1px solid #e0e0e0;
+    background: #fafafa;
+  }
+  td { border-bottom: 1px solid #f0f0f0; }
+  tr:last-child td { border-bottom: none; }
+  th:first-child, td:first-child { text-align: left; }
+  th:not(:first-child), td:not(:first-child) { text-align: right; }
+  td:first-child { font-weight: 500; }
+  td.result { font-variant-numeric: tabular-nums; }
+  .btn-reset {
+    font-family: inherit;
+    font-size: 14px;
+    padding: 7px 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    color: #333;
+    cursor: pointer;
+  }
+  .btn-reset:hover { background: #f0f0f0; }
+  .footnotes {
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 12px;
+    color: #444;
+  }
+  .footnotes p { margin: 0 0 10px; }
+  .footnotes p:last-child { margin-bottom: 0; }
+  .footnotes ol { margin: 6px 0 0; padding-left: 22px; list-style-type: lower-alpha; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- CALCULATOR 1: EFFECTIVE DATE -->
+  <div class="section">
+    <h2>Effective Date Calculator</h2>
+    <div class="card">
+      <div class="card-body">
+        <label for="eventDate">Event date / date of hire *</label>
+        <input type="date" id="eventDate">
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header header-blue">Looking forward (event date = day 1) **</div>
+      <table>
+        <thead>
+          <tr><th>Days</th><th>Day reached</th><th>Effective date</th></tr>
+        </thead>
+        <tbody id="forwardBody"></tbody>
+      </table>
+    </div>
+    <button type="button" class="btn-reset" id="resetForward">↺ Reset</button>
+  </div>
+
+  <!-- CALCULATOR 2: LOOKBACK -->
+  <div class="section">
+    <h2>Lookback Calculator</h2>
+    <div class="card">
+      <div class="card-body">
+        <label for="todayDate">Today's date</label>
+        <input type="date" id="todayDate">
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header header-green">Looking back (today = day 1)</div>
+      <table>
+        <thead>
+          <tr><th>Days</th><th>Day reached</th><th>Term date</th></tr>
+        </thead>
+        <tbody id="backBody"></tbody>
+      </table>
+    </div>
+    <button type="button" class="btn-reset" id="resetBack">↺ Reset</button>
+  </div>
+
+  <!-- FOOTNOTES -->
+  <div class="footnotes">
+    <p>This tool is provided as a courtesy. <strong>Contract rules supersede this tool.</strong> Refer to your current Group Master Application or contract to determine the employee's probationary period.</p>
+    <p>* <strong>Event date / date of hire:</strong> The date the employee has satisfied all eligibility criteria and is eligible to begin serving the probationary period. Refer to your contract and/or Group Administrator Guide for eligibility guidelines.</p>
+    <p>** <strong>Date of hire:</strong> For members serving a First of the Month Following Date of Hire probationary period, refer to your Group Master Application for the appropriate selection. Employees hired on the first of the month:</p>
+    <ol>
+      <li>Effective date = date of hire, or</li>
+      <li>Effective date = the first of the month following their date of hire.</li>
+    </ol>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  var INTERVALS = [30, 60, 90, 120, 150, 180];
+  var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  var DASH = "—";
+
+  function parseLocal(value) {
+    if (!value) return null;
+    var d = new Date(value + "T00:00:00");
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  function addDays(date, n) {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate() + n);
+  }
+
+  function firstOfNextMonth(date) {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 1);
+  }
+
+  function lastOfMonth(date) {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  }
+
+  function fmt(date) {
+    return MONTHS[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear();
+  }
+
+  function render(bodyId, start, direction, finalFn) {
+    var body = document.getElementById(bodyId);
+    var html = "";
+    INTERVALS.forEach(function (n) {
+      var reached = "", result = "";
+      if (start) {
+        var r = addDays(start, direction * (n - 1));
+        reached = fmt(r);
+        result = fmt(finalFn(r));
+      } else {
+        reached = DASH;
+        result = DASH;
+      }
+      html += "<tr><td>" + n + " days</td><td class=\"result\">" + reached +
+              "</td><td class=\"result\">" + result + "</td></tr>";
+    });
+    body.innerHTML = html;
+  }
+
+  var eventInput = document.getElementById("eventDate");
+  var todayInput = document.getElementById("todayDate");
+
+  function updateForward() {
+    render("forwardBody", parseLocal(eventInput.value), 1, firstOfNextMonth);
+  }
+  function updateBack() {
+    render("backBody", parseLocal(todayInput.value), -1, lastOfMonth);
+  }
+
+  eventInput.addEventListener("input", updateForward);
+  eventInput.addEventListener("change", updateForward);
+  todayInput.addEventListener("input", updateBack);
+  todayInput.addEventListener("change", updateBack);
+
+  document.getElementById("resetForward").addEventListener("click", function () {
+    eventInput.value = "";
+    updateForward();
+  });
+  document.getElementById("resetBack").addEventListener("click", function () {
+    todayInput.value = "";
+    updateBack();
+  });
+
+  updateForward();
+  updateBack();
+})();
+</script>
+</body>
+</html>
